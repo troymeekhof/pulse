@@ -1,13 +1,31 @@
 # Pulse — menu bar system monitor for macOS (Apple Silicon + Intel)
 
-Native SwiftUI menu bar app. No Electron, no dependencies, ~0% CPU.
+Native SwiftUI menu bar app. No Electron, ~0% CPU, updates itself.
+
+<p align="center">
+  <img src="docs/dashboard.png" width="420" alt="Pulse dashboard: GPU, memory, power and thermal">
+  &nbsp;
+  <img src="docs/popover-network.png" width="300" alt="Pulse popover: network, disk, NAS and top apps">
+</p>
+
+## Download
+
+**[Download Pulse.dmg](https://github.com/troymeekhof/pulse/releases/latest/download/Pulse.dmg)** — macOS 13 Ventura or newer.
+
+1. Open the DMG and drag **Pulse** into **Applications**, then open it.
+2. First launch only: macOS will warn that it can't verify the app. Click **Done**, then go to
+   **System Settings → Privacy & Security** and click **Open Anyway**.
+3. Pulse lives in the menu bar (no Dock icon). It updates itself automatically from then on;
+   gear menu → **Check for Updates…** checks right away.
+
+## What it shows
 
 **Menu bar widget** shows live `GPU % · Memory used`. Click it for the dashboard:
 GPU ring + 90-second sparkline, memory ring + sparkline, App / Wired / Compressed / Cached
 breakdown bar, swap, macOS memory-pressure state, and a thermal card (ProcessInfo thermal state + `pmset -g therm` CPU speed limit; the menu bar icon turns into a thermometer while throttling). "Open Dashboard" gives a larger
 resizable window with renderer/tiler split and GPU-allocated memory.
 
-## Install (one command)
+## Build from source
 
 ```bash
 cd Pulse
