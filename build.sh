@@ -4,6 +4,8 @@
 #         ./build.sh --install  → builds, copies to /Applications, launches it
 #         ./build.sh --package  → builds a universal app (Apple Silicon + Intel if possible)
 #                                 and creates ~/Downloads/Pulse.dmg to send to someone
+# Env:    SIGN_IDENTITY  codesign identity (default "-" = ad-hoc; set to "Developer ID Application: …" later)
+#         DMG_OUT        where --package writes the DMG (default ~/Downloads/Pulse.dmg)
 set -euo pipefail
 cd "$(dirname "$0")"
 MODE="${1:-}"
@@ -34,17 +36,35 @@ if [ "$MODE" == "--package" ]; then
   fi
 fi
 
-APP="Pulse.app"
-rm -rf "$APP"
-mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
+# Assemble outside the project: ~/Documents syncs via iCloud, whose file attributes
+# make codesign fail ("resource fork, Finder information, or similar detritus").
+STAGE_DIR="${TMPDIR:-/tmp}/pulse-build"
+APP="$STAGE_DIR/Pulse.app"
+rm -rf "$APP" Pulse.app
+mkdir -p "$STAGE_DIR"
+mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources" "$APP/Contents/Frameworks"
 cp "$BIN" "$APP/Contents/MacOS/Pulse"
+# Sparkle (auto-updates). The SwiftPM xcframework slice is already universal.
+ditto "$(dirname "$ARM")/Sparkle.framework" "$APP/Contents/Frameworks/Sparkle.framework"
 cp Resources/Info.plist "$APP/Contents/Info.plist"
 [ -f Resources/Pulse.icns ] && cp Resources/Pulse.icns "$APP/Contents/Resources/Pulse.icns"
 xattr -cr "$APP" 2>/dev/null || true
 
-# Ad-hoc sign so macOS lets it run and "Launch at Login" works.
-codesign --force --deep --sign - "$APP" >/dev/null 2>&1 || true
-echo "▸ Built $APP"
+# Sign inside-out (Sparkle's helpers first, then the app). Ad-hoc by default so macOS lets
+# it run and "Launch at Login" works. Hardened runtime only with a real identity — with
+# ad-hoc signing, library validation would refuse to load Sparkle.framework.
+IDENTITY="${SIGN_IDENTITY:--}"
+CS=(codesign --force --sign "$IDENTITY")
+[ "$IDENTITY" != "-" ] && CS+=(--options runtime --timestamp)
+SPK="$APP/Contents/Frameworks/Sparkle.framework/Versions/B"
+"${CS[@]}" "$SPK/XPCServices/Installer.xpc"
+"${CS[@]}" --preserve-metadata=entitlements "$SPK/XPCServices/Downloader.xpc"
+"${CS[@]}" "$SPK/Autoupdate"
+"${CS[@]}" "$SPK/Updater.app"
+"${CS[@]}" "$APP/Contents/Frameworks/Sparkle.framework"
+"${CS[@]}" "$APP"
+codesign --verify --deep --strict "$APP"
+echo "▸ Built and signed $APP"
 
 if [ "$MODE" == "--install" ]; then
   pkill -x Pulse >/dev/null 2>&1 || true
@@ -82,10 +102,10 @@ Click it to see the dashboard. Gear icon = settings, including
 
 Requires macOS 13 Ventura or newer.
 TXT
-  OUT="$HOME/Downloads/Pulse.dmg"
+  OUT="${DMG_OUT:-$HOME/Downloads/Pulse.dmg}"
   rm -f "$OUT"
   hdiutil create -volname "Pulse" -srcfolder "$STAGE" -ov -format UDZO "$OUT" >/dev/null
   rm -rf "$(dirname "$STAGE")"
   echo "▸ Created $OUT ($(du -h "$OUT" | cut -f1))"
-  open -R "$OUT"
+  if [ -z "${DMG_OUT:-}" ]; then open -R "$OUT"; fi
 fi

@@ -3,6 +3,7 @@ import AppKit
 
 struct DashboardView: View {
     @EnvironmentObject var monitor: Monitor
+    @EnvironmentObject var updater: Updater
     @Environment(\.openWindow) private var openWindow
     @AppStorage("labelStyle") private var labelStyle: MenuBarLabel.BarStyle = .both
     @State private var launchAtLogin = LaunchAtLogin.isEnabled
@@ -449,6 +450,10 @@ struct DashboardView: View {
                     }
                 }
                 Button("Reset energy meter") { monitor.resetEnergy() }
+                Divider()
+                Button("Check for Updates…") { updater.checkForUpdates() }
+                    .disabled(!updater.canCheck)
+                Text("Version \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "?")")
             } label: {
                 Image(systemName: "gearshape.fill")
             }

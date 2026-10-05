@@ -1,15 +1,21 @@
 import SwiftUI
 import AppKit
 import ServiceManagement
+import Sparkle
 
 @main
 struct PulseApp: App {
     @StateObject private var monitor = Monitor()
 
+    init() {
+        _ = Updater.shared   // start Sparkle at launch so daily background checks run
+    }
+
     var body: some Scene {
         MenuBarExtra {
             DashboardView(compact: true)
                 .environmentObject(monitor)
+                .environmentObject(Updater.shared)
         } label: {
             MenuBarLabel()
                 .environmentObject(monitor)
@@ -19,6 +25,7 @@ struct PulseApp: App {
         Window("Pulse", id: "dashboard") {
             DashboardView(compact: false)
                 .environmentObject(monitor)
+                .environmentObject(Updater.shared)
                 .frame(minWidth: 560, minHeight: 520)
                 .background(Theme.windowBackground)
         }
@@ -86,6 +93,26 @@ struct MenuBarLabel: View {
         let img = renderer.nsImage ?? NSImage(size: NSSize(width: 22, height: 22))
         img.isTemplate = true   // lets macOS tint it for light/dark menu bars
         return img
+    }
+}
+
+// MARK: - Updates (Sparkle; feed + public key in Info.plist)
+
+@MainActor
+final class Updater: ObservableObject {
+    static let shared = Updater()
+
+    private let controller = SPUStandardUpdaterController(
+        startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil)
+    @Published private(set) var canCheck = false
+
+    private init() {
+        controller.updater.publisher(for: \.canCheckForUpdates).assign(to: &$canCheck)
+    }
+
+    func checkForUpdates() {
+        NSApp.activate(ignoringOtherApps: true)   // menu bar app — bring Sparkle's window forward
+        controller.checkForUpdates(nil)
     }
 }
 

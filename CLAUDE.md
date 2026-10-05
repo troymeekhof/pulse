@@ -55,33 +55,27 @@ build.sh                          ./build.sh | --install | --package (universal 
   dual GPU Radeon Pro 555 + Intel HD 630 — GPU reader currently takes the first IOAccelerator with
   PerformanceStatistics; may need to prefer the discrete GPU).
 
-## Current state / known issues
+## Updates & releases (free — no Apple Developer Program)
 
-- Distribution is **ad-hoc signed** → Gatekeeper warning on other Macs ("Open Anyway" needed).
-- A friend already has v1.0 (no updater). They must install the first updater-enabled build once.
-- Old installer workarounds (`Install Pulse*.command`, `PulseInstaller*.zip`) in ~/Downloads are
-  obsolete — can be deleted.
+- Repo `troymeekhof/pulse` is **public** so Sparkle can download release assets anonymously.
+- **Sparkle 2** (SwiftPM) — `Updater` in PulseApp.swift starts at launch; daily automatic checks,
+  installs silently (`SUAutomaticallyUpdate`); gear menu → "Check for Updates…" + version.
+  Feed: `appcast.xml` on main (raw.githubusercontent). `SUPublicEDKey` in Info.plist; the EdDSA
+  **private key lives only in Troy's login Keychain** — back it up with
+  `.build/artifacts/sparkle/Sparkle/bin/generate_keys -x <file>`; losing it means installed copies
+  can never be updated again.
+- `build.sh` assembles/signs in `$TMPDIR/pulse-build` (iCloud-synced ~/Documents breaks codesign),
+  embeds Sparkle.framework, signs inside-out. `SIGN_IDENTITY` env var (default ad-hoc `-`);
+  hardened runtime only with a real identity.
+- **Ship an update:** `./release.sh 1.2 "notes"` — clean tree required. Bumps Info.plist, builds
+  universal, zips + DMG, `sign_update`, GitHub release, prepends appcast item, pushes.
+- Still ad-hoc signed → first install on a new Mac needs "Open Anyway" once; updates after that
+  are automatic. Friend on v1.0 (pre-updater) must install the DMG manually once:
+  https://github.com/troymeekhof/pulse/releases/latest/download/Pulse.dmg
 
-## Next steps (what Troy asked for: "ship this properly and automatically")
+## Possible follow-ups
 
-1. `git init`, `.gitignore` (already present), first commit.
-2. **GitHub**: repo **already created** — `https://github.com/troymeekhof/pulse` (PRIVATE, empty).
-   Add it as `origin` and push `main`. Because it's private, Sparkle can't download release assets
-   from it anonymously: either make it public, or create a public releases-only repo
-   (e.g. `troymeekhof/pulse-releases`) for appcast.xml + update archives. Ask Troy which.
-3. **Sparkle 2** auto-updates: add via SwiftPM, embed `Sparkle.framework` in
-   `Contents/Frameworks` (add rpath `@executable_path/../Frameworks`), `SUFeedURL` +
-   `SUPublicEDKey` in Info.plist, `SPUStandardUpdaterController`, "Check for Updates…" in gear menu,
-   automatic daily checks. Generate EdDSA keys with Sparkle's `generate_keys` (private key stays in
-   Troy's Keychain). Appcast hosted from the GitHub repo/Pages; archives in GitHub Releases.
-4. **Developer ID** (Troy enrolling in Apple Developer Program): sign with
-   `--options runtime --timestamp`, sign Sparkle's nested helpers properly (don't rely on `--deep`),
-   notarize with `xcrun notarytool submit --keychain-profile pulse-notary --wait`, staple app + DMG.
-   No sandbox (app needs IOKit SMC, nettop, pmset). Never handle Troy's passwords — he runs
-   `notarytool store-credentials` himself.
-5. A single `./release.sh <version>` that bumps CFBundleShortVersionString/CFBundleVersion, builds
-   universal, signs, notarizes, staples, makes DMG + Sparkle zip, signs the update, updates
-   appcast.xml, creates the GitHub release and uploads assets.
-6. Possible follow-ups Troy mentioned: Ethernet link-speed indicator on the Network card
-   (warn at 100 Mbps), Internet vs local-network split, built-in `networkQuality` speed test button,
-   prefer discrete GPU on dual-GPU Intel Macs.
+- Developer ID + notarization if Troy ever joins the Apple Developer Program ($99/yr): set
+  `SIGN_IDENTITY`, add `notarytool` + staple to release.sh. Never handle Troy's passwords.
+- Ethernet link-speed indicator on the Network card (warn at 100 Mbps), Internet vs local-network
+  split, built-in `networkQuality` speed test button, prefer discrete GPU on dual-GPU Intel Macs.

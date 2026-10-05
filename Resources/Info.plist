@@ -16,5 +16,10 @@
     <key>LSApplicationCategoryType</key><string>public.app-category.utilities</string>
     <key>NSHighResolutionCapable</key><true/>
     <key>NSSupportsAutomaticGraphicsSwitching</key><true/>
+    <key>SUFeedURL</key><string>https://raw.githubusercontent.com/troymeekhof/pulse/main/appcast.xml</string>
+    <key>SUPublicEDKey</key><string>FIcxRI4t8yrW/dEX2VGie0bt7fzYGqvlZuUQj4PHeYw=</string>
+    <key>SUEnableAutomaticChecks</key><true/>
+    <key>SUAutomaticallyUpdate</key><true/>
+    <key>SUScheduledCheckInterval</key><integer>86400</integer>
 </dict>
 </plist>
