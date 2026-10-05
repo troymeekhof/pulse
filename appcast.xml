@@ -3,6 +3,15 @@
   <channel>
     <title>Pulse</title>
     <item>
+      <title>Version 1.1.1</title>
+      <pubDate>Mon, 05 Oct 2026 20:21:19 GMT</pubDate>
+      <sparkle:version>1.1.1</sparkle:version>
+      <sparkle:shortVersionString>1.1.1</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
+      <description><![CDATA[<p>New Liquid Glass tab switcher. The NAS card now has its own live traffic graph.</p>]]></description>
+      <enclosure url="https://github.com/troymeekhof/pulse/releases/download/v1.1.1/Pulse-1.1.1.zip" type="application/octet-stream" sparkle:edSignature="dxFMq1NiaQgtBn1Syt7JUcjyu333BUzVcVk3/QkFtspr+XqsrOh7bu4Vgh7lB9wstgMWA1eRjy6k1F4Quv3yBQ==" length="2099937" />
+    </item>
+    <item>
       <title>Version 1.1</title>
       <pubDate>Mon, 05 Oct 2026 17:57:31 GMT</pubDate>
       <sparkle:version>1.1</sparkle:version>
