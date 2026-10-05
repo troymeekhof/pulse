@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
+  <channel>
+    <title>Pulse</title>
+    <item>
+      <title>Version 1.1</title>
+      <pubDate>Mon, 05 Oct 2026 17:57:31 GMT</pubDate>
+      <sparkle:version>1.1</sparkle:version>
+      <sparkle:shortVersionString>1.1</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>13.0</sparkle:minimumSystemVersion>
+      <description><![CDATA[<p>Pulse now updates itself automatically. Use Check for Updates… in the gear menu to check right away.</p>]]></description>
+      <enclosure url="https://github.com/troymeekhof/pulse/releases/download/v1.1/Pulse-1.1.zip" type="application/octet-stream" sparkle:edSignature="0+DhVDez0+AAbYO4kPiWxtjL/4562BZqKGgSui41lHBuhUWVx+PBh5EmCA8KimKbhmeTTfdfdWgnF3LYWmD2Dw==" length="2077189" />
+    </item>
+  </channel>
+</rss>
