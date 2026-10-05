@@ -31,12 +31,7 @@ struct DashboardView: View {
         VStack(alignment: .leading, spacing: 12) {
             header
             if compact {
-                Picker("", selection: $tab) {
-                    Text("System").tag(0)
-                    Text("Network & Disk").tag(1)
-                }
-                .pickerStyle(.segmented)
-                .labelsHidden()
+                GlassTabs(selection: $tab, tabs: [("System", "cpu"), ("Network & Disk", "network")])
             }
             if !compact || tab == 0 {
                 HStack(spacing: 12) {
@@ -110,6 +105,10 @@ struct DashboardView: View {
                     Text("↑ " + Fmt.rate(io.nasOut)).foregroundStyle(active ? Theme.netB : Theme.textSecondary)
                 }
                 .font(.system(size: 12, weight: .bold, design: .rounded)).monospacedDigit()
+
+                DualSparkline(a: monitor.nasInHistory.values, b: monitor.nasOutHistory.values,
+                              colorA: Theme.netA, colorB: Theme.netB)
+                    .frame(height: compact ? 34 : 56)
 
                 if io.nas.isEmpty {
                     Text(io.shares.isEmpty ? "No NAS shares mounted, no NAS traffic." : "Idle — no traffic to your NAS right now.")

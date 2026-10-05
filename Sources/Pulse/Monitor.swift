@@ -105,6 +105,9 @@ final class Monitor: ObservableObject {
     @Published var netUpHistory = History(capacity: 90)
     @Published var diskReadHistory = History(capacity: 90)
     @Published var diskWriteHistory = History(capacity: 90)
+    // NAS totals arrive every ~2 s with the nettop sample → 45 points ≈ the same 90 s window
+    @Published var nasInHistory = History(capacity: 45)
+    @Published var nasOutHistory = History(capacity: 45)
     private let netReader = NetReader()
     private let diskReader = DiskReader()
     private let ioSampler = ProcessIOSampler()
@@ -192,6 +195,8 @@ final class Monitor: ObservableObject {
                 let snap = sampler.sample()
                 await MainActor.run {
                     self?.io = snap
+                    self?.nasInHistory.push(snap.nasIn)
+                    self?.nasOutHistory.push(snap.nasOut)
                     self?.ioBusy = false
                 }
             }

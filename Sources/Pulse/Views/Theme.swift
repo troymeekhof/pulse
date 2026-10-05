@@ -352,3 +352,63 @@ struct Pill: View {
         .foregroundStyle(color)
     }
 }
+
+// MARK: - Tab toggle (Liquid Glass capsule on macOS 26+, frosted material before that)
+
+struct GlassTabs: View {
+    @Binding var selection: Int
+    let tabs: [(title: String, icon: String)]
+    @Namespace private var ns
+
+    var body: some View {
+        HStack(spacing: 0) {
+            ForEach(tabs.indices, id: \.self) { i in segment(i) }
+        }
+        .padding(4)
+        .modifier(GlassCapsule(tint: nil, interactive: false))
+    }
+
+    private func segment(_ i: Int) -> some View {
+        let selected = selection == i
+        return Button {
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) { selection = i }
+        } label: {
+            Label(tabs[i].title, systemImage: tabs[i].icon)
+                .font(.system(size: 12.5, weight: .semibold))
+                .foregroundStyle(selected ? .white : Theme.textSecondary)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 7)
+                .background {
+                    if selected {
+                        Capsule().fill(.white.opacity(0.08))
+                            .modifier(GlassCapsule(tint: Theme.gpuB.opacity(0.35), interactive: true))
+                            .matchedGeometryEffect(id: "thumb", in: ns)
+                    }
+                }
+                .contentShape(Capsule())
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+private struct GlassCapsule: ViewModifier {
+    var tint: Color?
+    var interactive: Bool
+    func body(content: Content) -> some View {
+        if #available(macOS 26, *) {
+            content.glassEffect(glass, in: .capsule)
+        } else {
+            content.background {
+                Capsule().fill(tint ?? Color.white.opacity(0.06))
+                    .background(.ultraThinMaterial, in: Capsule())
+                    .overlay(Capsule().stroke(Theme.cardStroke, lineWidth: 0.5))
+            }
+        }
+    }
+    @available(macOS 26, *)
+    private var glass: Glass {
+        var g = Glass.regular
+        if let tint { g = g.tint(tint) }
+        return interactive ? g.interactive() : g
+    }
+}
