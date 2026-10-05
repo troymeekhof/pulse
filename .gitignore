@@ -1,0 +1,7 @@
+.build/
+.swiftpm/
+Pulse.app/
+*.dmg
+*.zip
+.DS_Store
+Resources/icon_preview.png
