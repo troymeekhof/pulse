@@ -61,18 +61,34 @@ def render(size):
 
     return img.resize((size, size), Image.LANCZOS)
 
-TYPES = {16: b"icp4", 32: b"icp5", 64: b"icp6", 128: b"ic07", 256: b"ic08", 512: b"ic09", 1024: b"ic10"}
+# PNG-in-ICNS entries. The small sizes use the retina slots (ic11 = 16@2x, ic12 = 32@2x): the old
+# icp4/icp5 slots holding PNG data draw as garbage in System Settings on current macOS.
+TYPES = [(b"ic11", 32), (b"ic12", 64), (b"ic07", 128), (b"ic13", 256), (b"ic08", 256),
+         (b"ic14", 512), (b"ic09", 512), (b"ic10", 1024)]
+ICONSET = {"icon_16x16": 16, "icon_16x16@2x": 32, "icon_32x32": 32, "icon_32x32@2x": 64,
+           "icon_128x128": 128, "icon_128x128@2x": 256, "icon_256x256": 256, "icon_256x256@2x": 512,
+           "icon_512x512": 512, "icon_512x512@2x": 1024}
 
 def main():
+    cache = {}
+    def png(size):
+        if size not in cache:
+            buf = io.BytesIO(); render(size).save(buf, "PNG"); cache[size] = buf.getvalue()
+        return cache[size]
     entries = b""
-    for size, tag in TYPES.items():
-        buf = io.BytesIO(); render(size).save(buf, "PNG"); data = buf.getvalue()
+    for tag, size in TYPES:
+        data = png(size)
         entries += tag + struct.pack(">I", len(data) + 8) + data
     icns = b"icns" + struct.pack(">I", len(entries) + 8) + entries
     out = os.path.join(HERE, "Pulse.icns")
     with open(out, "wb") as f: f.write(icns)
+    # build.sh prefers this folder and runs Apple's iconutil on it, which is the authoritative path.
+    iconset = os.path.join(HERE, "Pulse.iconset")
+    os.makedirs(iconset, exist_ok=True)
+    for name, size in ICONSET.items():
+        with open(os.path.join(iconset, name + ".png"), "wb") as f: f.write(png(size))
     render(512).save(os.path.join(HERE, "icon_preview.png"))
-    print("wrote", out, len(icns), "bytes")
+    print("wrote", out, len(icns), "bytes and", iconset)
 
 if __name__ == "__main__":
     main()

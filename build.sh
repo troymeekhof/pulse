@@ -47,7 +47,12 @@ cp "$BIN" "$APP/Contents/MacOS/Pulse"
 # Sparkle (auto-updates). The SwiftPM xcframework slice is already universal.
 ditto "$(dirname "$ARM")/Sparkle.framework" "$APP/Contents/Frameworks/Sparkle.framework"
 cp Resources/Info.plist "$APP/Contents/Info.plist"
-[ -f Resources/Pulse.icns ] && cp Resources/Pulse.icns "$APP/Contents/Resources/Pulse.icns"
+# Icon: let Apple's iconutil build it from the PNG set; fall back to the prebuilt file.
+if [ -d Resources/Pulse.iconset ] && iconutil -c icns Resources/Pulse.iconset -o "$APP/Contents/Resources/Pulse.icns" 2>/dev/null; then
+  echo "▸ Icon built with iconutil"
+elif [ -f Resources/Pulse.icns ]; then
+  cp Resources/Pulse.icns "$APP/Contents/Resources/Pulse.icns"
+fi
 xattr -cr "$APP" 2>/dev/null || true
 
 # Sign inside-out (Sparkle's helpers first, then the app). Ad-hoc by default so macOS lets

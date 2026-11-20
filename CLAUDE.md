@@ -40,7 +40,7 @@ Sources/Pulse/ProcessIO.swift     nettop + proc_pid_rusage sampler, NAS flows, m
 Sources/Pulse/Views/Theme.swift   colors, Card, Ring, Sparkline, DualSparkline, DriveCard, AppIORow…
 Sources/Pulse/Views/DashboardView.swift   popover + window layout
 Resources/Info.plist              LSUIElement, bundle id com.midjulymedia.pulse, v1.0
-Resources/Pulse.icns, make_icon.py
+Resources/Pulse.icns, Pulse.iconset/, make_icon.py   (build.sh runs iconutil on the iconset; .icns is the fallback)
 build.sh                          ./build.sh | --install | --package (universal + ~/Downloads/Pulse.dmg)
 ```
 
